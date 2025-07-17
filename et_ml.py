@@ -64,9 +64,19 @@ def crear_control(parent, label, var, tipo, valores=None, rango=None, width=30):
         value_frame.pack(side='right', fill='x', expand=True)
         scale = ttk.Scale(value_frame, variable=var, from_=rango[0], to=rango[1], orient='horizontal')
         scale.pack(fill='x', expand=True)
-        value_label = ttk.Label(value_frame, textvariable=var, width=10)
+
+        value_label = ttk.Label(value_frame, width=10)
         value_label.pack(side='right', padx=10)
 
+        
+        def actualizar_valor(*args):
+            val = var.get()
+            value_label.config(text=f"{val:.1f}")
+
+        var.trace_add('write', actualizar_valor)
+        actualizar_valor()  # para mostrar valor inicial
+
+# Variables para regresión
 frame_reg = ttk.Frame(notebook, padding=20)
 notebook.add(frame_reg, text="Tiempo de Vida")
 
@@ -82,9 +92,7 @@ vars_reg = {
     'EquipRatio': tk.DoubleVar(value=0.75)
 }
 
-for var in vars_reg.values():
-    if isinstance(var, tk.DoubleVar):
-        var.trace_add('write', lambda *_, v=var: v.set(round(v.get(), 2)))
+
 
 crear_control(frame_reg, "Presupuesto equipamiento:", vars_reg['RoundStartingEquipmentValue'], 'scale', rango=[0, 10000])
 crear_control(frame_reg, "Kill Rate:", vars_reg['KillRate'], 'scale', rango=[0, 1])
@@ -97,6 +105,7 @@ crear_control(frame_reg, "Velocidad (m/s):", vars_reg['Speed_mps'], 'scale', ran
 crear_control(frame_reg, "Equip Ratio:", vars_reg['EquipRatio'], 'scale', rango=[0, 1])
 
 ttk.Button(frame_reg, text="Predecir Tiempo de Vida", command=lambda: predecir_regresion(), style='info.TButton').pack(pady=15, ipady=5)
+
 
 frame_clasif = ttk.Frame(notebook, padding=20)
 notebook.add(frame_clasif, text="Supervivencia")
@@ -111,7 +120,8 @@ for feat in FEATURES:
         continue
     else:
         vars_clasif[feat] = tk.DoubleVar(value=0.0)
-
+        
+#variables para clasificacion 
 vars_clasif['RoundStartingEquipmentValue'].set(2500)
 vars_clasif['TravelledDistance'].set(1000)
 vars_clasif['Speed_mps'].set(1.5)
@@ -129,26 +139,32 @@ vars_clasif['PrimaryWeaponClass'].set(ARMAS[0])
 
 crear_control(frame_clasif, "Mapa:", vars_clasif['Map'], 'combobox', MAPS)
 crear_control(frame_clasif, "Arma principal:", vars_clasif['PrimaryWeaponClass'], 'combobox', ARMAS)
-crear_control(frame_clasif, "Presupuesto:", vars_clasif['RoundStartingEquipmentValue'], 'entry')
-crear_control(frame_clasif, "Distancia:", vars_clasif['TravelledDistance'], 'entry')
-crear_control(frame_clasif, "Velocidad:", vars_clasif['Speed_mps'], 'entry')
-crear_control(frame_clasif, "Kills:", vars_clasif['RoundKills'], 'entry')
-crear_control(frame_clasif, "Asistencias:", vars_clasif['RoundAssists'], 'entry')
-crear_control(frame_clasif, "Headshots:", vars_clasif['RoundHeadshots'], 'entry')
-crear_control(frame_clasif, "Presupuesto equipo:", vars_clasif['TeamStartingEquipmentValue'], 'entry')
-crear_control(frame_clasif, "Kill Rate:", vars_clasif['KillRate'], 'entry')
-crear_control(frame_clasif, "Ratio Headshots:", vars_clasif['HeadshotRatio'], 'entry')
+crear_control(frame_clasif, "Presupuesto:", vars_clasif['RoundStartingEquipmentValue'], 'scale', rango=[0, 10000])
+crear_control(frame_clasif, "Distancia:", vars_clasif['TravelledDistance'], 'scale', rango=[0, 2000])
+crear_control(frame_clasif, "Velocidad:", vars_clasif['Speed_mps'], 'scale', rango=[0, 5])
+crear_control(frame_clasif, "Kills:", vars_clasif['RoundKills'], 'scale', rango=[0, 20])
+crear_control(frame_clasif, "Asistencias:", vars_clasif['RoundAssists'], 'scale', rango=[0, 20])
+crear_control(frame_clasif, "Headshots:", vars_clasif['RoundHeadshots'], 'scale', rango=[0, 20])
+crear_control(frame_clasif, "Presupuesto equipo:", vars_clasif['TeamStartingEquipmentValue'], 'scale', rango=[0, 20000])
+crear_control(frame_clasif, "Kill Rate:", vars_clasif['KillRate'], 'scale', rango=[0, 1])
+crear_control(frame_clasif, "Ratio Headshots:", vars_clasif['HeadshotRatio'], 'scale', rango=[0, 1])
 crear_control(frame_clasif, "Eco Round:", vars_clasif['EcoRound'], 'check')
-crear_control(frame_clasif, "Distancia por Kill:", vars_clasif['DistancePerKill'], 'entry')
-crear_control(frame_clasif, "Intensidad:", vars_clasif['EngagementIntensity'], 'entry')
+crear_control(frame_clasif, "Distancia por Kill:", vars_clasif['DistancePerKill'], 'scale', rango=[0, 1000])
+crear_control(frame_clasif, "Intensidad:", vars_clasif['EngagementIntensity'], 'scale', rango=[0, 1])
+
 
 result_frame = ttk.Frame(frame_clasif)
 result_frame.pack(fill='x', pady=20)
 
-resultado_label = ttk.Label(result_frame, text="Complete los datos y haga clic en Predecir", font=('Helvetica', 12, 'bold'), style='info.Inverse.TLabel')
-resultado_label.pack(fill='x', expand=True, ipady=5)
+a
+boton = ttk.Button(result_frame, text="Predecir Supervivencia", command=lambda: predecir_clasificacion(), style='info.TButton')
+boton.pack(side='left', padx=10, ipadx=10, ipady=5)
 
-ttk.Button(frame_clasif, text="Predecir Supervivencia", command=lambda: predecir_clasificacion(), style='info.TButton').pack(pady=15, ipady=5)
+
+resultado_label = ttk.Label(result_frame, text="No Sobrevive: __._%  |  Sobrevive: __._%", font=('Helvetica', 12, 'bold'), style='info.Inverse.TLabel')
+resultado_label.pack(side='left', padx=15, ipady=5)
+
+
 
 def predecir_regresion():
     try:
@@ -165,7 +181,7 @@ def predecir_regresion():
         }
         df = pd.DataFrame([data])
         pred = modelo_regresion.predict(df)[0]
-        messagebox.showinfo("Resultado", f"Tiempo estimado de vida: {pred:.2f} segundos")
+        messagebox.showinfo("Resultado", f"Tiempo estimado de vida: {pred:.1f} segundos")
     except Exception as e:
         messagebox.showerror("Error", f"No se pudo calcular la predicción: {e}")
 
