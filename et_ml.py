@@ -156,7 +156,6 @@ crear_control(frame_clasif, "Intensidad:", vars_clasif['EngagementIntensity'], '
 result_frame = ttk.Frame(frame_clasif)
 result_frame.pack(fill='x', pady=20)
 
-a
 boton = ttk.Button(result_frame, text="Predecir Supervivencia", command=lambda: predecir_clasificacion(), style='info.TButton')
 boton.pack(side='left', padx=10, ipadx=10, ipady=5)
 
