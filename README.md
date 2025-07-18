@@ -72,7 +72,7 @@ Se abrirá una ventana gráfica con dos pestañas:
 
 ---
 
-##et Solución de errores comunes
+## Solución de errores comunes
 
 - ❌ `No module named 'sklearn'`: Instala con `pip install scikit-learn`
 - ❌ `No module named 'ttkbootstrap'`: Instala con `pip install ttkbootstrap`
